@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.byd.emg.mapper.ElectricityPriceStatementMapper" >
+    <!--新增立约容量-->
+    <insert id ="insert_Contractual_capacity" parameterType="com.byd.emg.pojo.Contractual_capacity" >
+        INSERT INTO Contractual_capacity ([Name],Contractual_capacity,Price,Applicable_time,his_time,num)VALUES
+             <foreach collection ="contractual_capacity" item="item" index= "index" separator =",">
+                 (
+                '${item.Name}',
+                 '${item.Contractual_capacity}',
+                 '${item.Price}',
+                 '${item.Applicable_time}',
+                 '${time}',
+                 '${item.num}'
+                 )
+            </foreach >
+     </insert >
+
+    <insert id ="insert_tax" parameterType="com.byd.emg.pojo.Tax" >
+        INSERT INTO Total_Electricity_Tax (tax,start_time)VALUES
+            ('${tax}','${start_time}' )
+    </insert >
+
+    <update id="updateTax" parameterType="com.byd.emg.pojo.Tax">
+        update Total_Electricity_Tax set
+            tax='${tax}',
+            start_time='${start_time}'
+            where id=${id}
+    </update>
+
+    <update id="UpdateSmTable" parameterType="java.lang.String">
+        update ${tableName} set
+            ${columnName}='${columnValue}'
+            where ${whereColumnName}= ${whereValue}
+    </update>
+    <!--修改立约容量-->
+    <update id="updateContractualCapacity" parameterType="java.util.List">
+        <foreach collection="updateList" index="index" item="item" separator=";">
+            update Contractual_capacity set
+            Name='${item.Name}',
+            Contractual_capacity='${item.Contractual_capacity}',
+            Price='${item.Price}',
+            Applicable_time='${item.Applicable_time}',
+            his_time='${time}'
+            where id=${item.id}
+        </foreach>
+    </update>
+
+    <select id="selectLastTime" resultType="java.lang.String">
+        select top 1 ${field} from ${tableName}
+        <where>
+            <if test="true">
+                and ${field} is not null  and  ${field} &lt;&gt;''
+            </if>
+            <if test="type!='' and type!=null">
+                and type like '%${type}%'
+            </if>
+        </where>
+        order by ${field} desc
+    </select>
+
+    <select id="selectContractual_capacityByList" parameterType="java.util.List" resultType="Contractual_capacity">
+        select  id,Name,Contractual_capacity,Price,Applicable_time,his_time from Contractual_capacity
+        where Applicable_time in
+        <foreach collection="contractual_capacity" index="index" item="item" open="(" separator="," close=")">
+            '${item.Applicable_time}'
+        </foreach>
+    </select>
+
+    <select id="selectByCapacity" parameterType="com.byd.emg.pojo.Contractual_capacity" resultType="Contractual_capacity">
+        select * from Contractual_capacity where num='${num}' and Applicable_time='${Applicable_time}'
+    </select>
+
+    <select id="selectByTime" parameterType="java.lang.String" resultType="Tax">
+        select id,tax,start_time from Total_Electricity_Tax where start_time='${start_time}'
+    </select>
+
+    <select id="taxRecords" parameterType="java.lang.String" resultType="Tax">
+        select top 1 id,tax,start_time from Total_Electricity_Tax
+        <!--<where>-->
+            <!--<if test="start_time!='' and start_time!=null">-->
+                <!--and start_time like '%${start_time}%'-->
+            <!--</if>-->
+        <!--</where>-->
+        order by id desc
+    </select>
+
+
+    <update id="batchUpdateTax" parameterType="java.util.List">
+        <foreach collection="taxList" index="index" item="item" separator=";">
+            update Total_Electricity_Tax set
+            tax='${item.tax}'
+            where id=${item.id}
+        </foreach>
+    </update>
+
+    <update id="updateCapacityById" parameterType="com.byd.emg.pojo.Contractual_capacity">
+        update Contractual_capacity set
+        Name='${Name}',
+        Contractual_capacity='${Contractual_capacity}',
+        Price='${Price}',
+        Applicable_time='${Applicable_time}',
+        his_time='${his_time}'
+        where id=${id}
+    </update>
+
+    <insert id="insertCapacity" parameterType="com.byd.emg.pojo.Contractual_capacity">
+        insert into Contractual_capacity (num,Name,Contractual_capacity,Price,Applicable_time,his_time)
+        values (${num},'${Name}','${Contractual_capacity}','${Price}','${Applicable_time}','${his_time}')
+    </insert>
+
+    <update id="update_tax" parameterType="com.byd.emg.pojo.Tax" >
+        update Total_Electricity_Tax set end_time ='${start_time}'where id=(select max(id) from Total_Electricity_Tax)
+    </update>
+
+    <delete id="delTaxById" parameterType="java.lang.Long">
+        delete from Total_Electricity_Tax where id=${id}
+    </delete>
+
+    <insert id ="insert_TotalElectricityAddition" parameterType="com.byd.emg.pojo.TotalElectricityAddition" >
+        INSERT INTO Total_Electricity_Addition (Name,Unit_Price,start_time)VALUES
+        <foreach collection ="list" item="item" index= "index" separator =",">
+            (
+            '${item.Name}',
+            '${item.Unit_Price}',
+            '${item.Start_time}'
+            )
+        </foreach >
+    </insert >
+<!--  城市附加没写完
+-->
+    <update id="update_TotalElectricityAddition" parameterType="com.byd.emg.pojo.TotalElectricityAddition" >
+            update Total_Electricity_Addition set end_time =
+            (
+            '${item.Start_time}'
+            )
+
+        where id in
+     (SELECT top index id from Total_Electricity_Addition ORDER BY Start_time,id desc)
+    </update>
+
+    <select id="select_Contractual_capacity" parameterType="java.lang.String" resultType="com.byd.emg.pojo.Contractual_capacity">
+      SELECT * FROM Contractual_capacity order by id
+    </select>
+
+    <select id="select_Total_Electricity" parameterType="java.lang.String" resultType="java.util.Map">
+    SELECT
+	*
+FROM
+	Total_Electricity
+WHERE
+	[time] LIKE '%${Applicable_time}%'
+ORDER BY [time]DESC
+    </select>
+
+    <select id="select_Unit_Price" parameterType="java.lang.String" resultType="com.byd.emg.pojo.Unit_Price">
+        SELECT top 1 * FROM Unit_Price_Power WHERE start_time like '%${Applicable_time}%' order by start_time desc
+    </select>
+
+
+    <select id="select_TotalElectricityAddition" parameterType="java.lang.String" resultType="com.byd.emg.pojo.TotalElectricityAddition">
+        SELECT * FROM Total_Electricity_Addition order by type desc,number
+    </select>
+
+    <select id="select_tax" parameterType="java.lang.String" resultType="com.byd.emg.pojo.Tax">
+        SELECT top 1 * FROM Total_Electricity_Tax
+    </select>
+
+    <select id="selectAddtionByList" resultType="TotalElectricityAddition">
+        select  id,Name,Unit_Price,Start_time,end_time,type,number from Total_Electricity_Addition
+        where number in
+        <foreach collection="additionList" index="index" item="item" open="(" separator="," close=")">
+            '${item.number}'
+        </foreach>
+        and Start_time in
+        <foreach collection="additionList" index="index" item="item" open="(" separator="," close=")">
+            '${item.Start_time}'
+        </foreach>
+        and type='${type}'order by number
+    </select>
+
+    <!--批量修改-->
+    <update id="batchUpdateAddtion" parameterType="java.util.List">
+        <foreach collection="updateAddtionList" index="index" item="item" separator=";">
+            update Total_Electricity_Addition set
+            Name='${item.Name}',
+            Unit_Price='${item.Unit_Price}',
+            proportion='${item.proportion}',
+            Start_time='${item.Start_time}'
+            where id=${item.id}
+        </foreach>
+    </update>
+
+    <!--批量新增-->
+    <insert id="batchInsertAddtion">
+        insert into Total_Electricity_Addition (Name,Unit_Price,proportion, Start_time,end_time, type,number)
+        values
+        <foreach collection="additionList" index="index" item="item" separator=",">
+            ('${item.Name}','${item.Unit_Price}','${item.proportion}','${item.Start_time}','${item.end_time}','${type}',${item.number})
+        </foreach>
+    </insert>
+
+
+    <!--新增立约容量-->
+    <insert id="addElectricityFees" parameterType="com.byd.emg.pojo.Contractual_capacity" >
+        insert into Contractual_capacity (Name,Contractual_capacity,Price,Applicable_time,monthTime,realTime,Rated_Capacity)
+        values ('${Name}','${Contractual_capacity}','${Price}','${Applicable_time}','${monthTime}','${realTime}','${Rated_Capacity}')
+
+    </insert>
+
+    <!--平目录、工业电价修改-->
+    <update id="Total_Electricity_Update" parameterType="com.byd.emg.pojo.TotalElectricityAddition">
+            update Total_Electricity_Addition set
+            Name='${Name}',
+            Unit_Price='${Unit_Price}',
+            proportion='${proportion}',
+            Start_time='${Start_time}',
+            end_time='${end_time}',
+            type='${type}'
+            where id=${id}
+    </update>
+
+    <select id="Total_Electricity_Select" resultType="TotalElectricityAddition">
+        select  id,Name,Unit_Price,proportion,Start_time,end_time,type from Total_Electricity_Addition
+        <where>
+            <if test="type!='' and type!=null">
+                and type='${type}'
+            </if>
+            <!--<if test="searchTime!='' and searchTime!=null">-->
+                <!--and Start_time like '%${searchTime}%'-->
+            <!--</if>-->
+        </where>
+    </select>
+
+    <select id="selectLatestTime" resultType="java.lang.String">
+        select top(1) Start_time from Total_Electricity_Addition where type='${type}' order by Start_time desc
+    </select>
+
+    <delete id="Total_Electricity_Delete" parameterType="java.lang.Long">
+        delete from Total_Electricity_Addition where id=${id}
+    </delete>
+
+
+    <!--电单价立约容量配置修改-->
+    <update id="electricityFeesUpdate" parameterType="com.byd.emg.pojo.Contractual_capacity" >
+            update Contractual_capacity set
+                Name='${Name}',
+                Contractual_capacity='${Contractual_capacity}',
+                Price='${Price}',
+                Applicable_time='${Applicable_time}',
+                monthTime='${monthTime}',
+                realTime='${realTime}',
+                Rated_Capacity='${Rated_Capacity}'
+            where id=${id}
+    </update>
+
+    <select id="electricityFeesSelect" resultType="Contractual_capacity">
+        select id,Name,Contractual_capacity,Price,Applicable_time,monthTime,realTime,Rated_Capacity from Contractual_capacity
+
+    </select>
+
+
+    <select id="selectElectricityFeesLatestTime" resultType="java.lang.String">
+        select top(1) Applicable_time from Contractual_capacity  order by Applicable_time desc
+    </select>
+
+
+    <delete id="electricityFeesDelete" parameterType="java.lang.Long">
+        delete from Contractual_capacity where id=${id}
+    </delete>
+
+</mapper>

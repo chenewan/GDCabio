@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.byd.emg.mapper.ElectricityMapper" >
+
+    <sql id="Base_Column_List" >
+        id,super_id,tag_name,device_name,electricity_consumption,cost
+    </sql>
+
+    <!--根据"位号"或"设备名"查询对应的数据-->
+    <select id="selectByTag_name" parameterType="java.lang.String" resultType="Electricity">
+        select
+          <include refid="Base_Column_List" />
+        from electricity where ${query_criteria}
+    </select>
+
+    <!--根据super_id查询对应的数据-->
+    <select id="selectElectricityBySuper_Id" parameterType="java.lang.Long" resultType="Electricity">
+        select
+          <include refid="Base_Column_List" />
+        from electricity where super_id=#{super_id}
+    </select>
+
+</mapper>

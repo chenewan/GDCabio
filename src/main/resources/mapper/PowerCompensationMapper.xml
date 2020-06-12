@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.byd.emg.mapper.PowerCompensationMapper">
+    <insert id="batchIsert">
+        insert into power_compensation (pid,tagname,costValue,compensateValue,calculateValue,his_date,his_time)
+        values
+        <foreach collection="powerCompensationList" index="index" item="item" separator=",">
+            ('${item.pid}','${item.tagname}', '${item.costValue}', '${item.compensateValue}', '${item.calculateValue}',
+            '${his_date}','${his_time}')
+        </foreach>
+    </insert>
+</mapper>

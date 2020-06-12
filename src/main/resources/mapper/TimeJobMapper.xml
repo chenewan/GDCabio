@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.byd.emg.mapper.TimeJobMapper" >
+
+    <resultMap id="5MinResultMap" type="com.byd.emg.pojo.TimeJob" >
+        <id column="min_id" property="id" />
+        <result column="min_tagname" property="tagname"/>
+        <result column="min_time_value" property="time_value"/>
+        <result column="min_date" property="his_date"/>
+        <result column="min_time" property="his_time"/>
+    </resultMap>
+
+    <select id="getMonthCurrData" parameterType="java.lang.String" resultType="TimeJob">
+        select tagname,time_value,cabinet_number from
+        (<foreach collection="tagnameList" index="index" item="item" separator="union all">
+            select top 1 tagname,time_value,cabinet_number from ${dataSourceTableName} where tagname='${item}'
+            and his_date like '%${queryDate}%'
+            and convert(decimal(38,2),cast(replace(case time_value when '' then '0.00' when null then '0.00' else time_value
+            end,',','' )as float))!=0.00
+            order by his_date desc
+        </foreach>) a
+    </select>
+
+    <select id="selectTopXHLDWater" resultType="java.lang.String">
+        select top(1) state from history_xhldWater
+        order by id desc
+    </select>
+
+    <select id="selectRealTemp" parameterType="java.lang.String" resultType="java.lang.String">
+        select realValue from ${realValue_table}%
+        WHERE realValue_tagname='${tagName}%'
+    </select>
+    <!--手输数据和自采数据############start-->
+    <select id="selectRealTimeTagnameAll" parameterType="java.lang.String" resultType="java.lang.String">
+        select realValue_tagname from ${dataSourceTableName} ${condition}
+    </select>
+
+    <select id="selectShouShuTagnameList" parameterType="java.util.List" resultType="java.lang.String">
+        select tagname from real_original_table
+        where
+        tagname in
+        <foreach collection="tagnameList" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and way='手输'
+    </select>
+
+    <select id="selectZiCaiData" resultType="TimeJob">
+        select realValue_tagname as tagname,realValue as time_value,cabinet_number,date as his_date,time as his_time from ${dataSourceTableName}
+        where realValue_tagname in
+        <foreach collection="tagnameList" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getTimeJobByTableName" parameterType="java.lang.String" resultType="TimeJob">
+        select realValue_tagname as tagname,realValue as time_value from ${tableName}
+    </select>
+
+    <select id="selectShouShuData" parameterType="java.util.List" resultType="TimeJob">
+        select tagname,realValue as time_value,cabinet_number from real_original_table
+        where tagname in
+        <foreach collection="tagnameList" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="selectMaxHisTime" parameterType="java.lang.String" resultType="java.lang.String">
+        select max(his_time) from ${tableName}
+    </select>
+
+    <select id="selectByTagnameList" resultType="TimeJob">
+        select id,tagname,time_value,his_date,his_time from ${tableName}
+        where his_time='${hisTime}'
+        and tagname in
+        <foreach collection="tagnameList" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <!--查询当前周期内的耗值的集合-->
+    <select id="selectTotalConsume" resultType="TimeJob">
+        select tagname,sum(cast(case time_value when '' then '0.0' when null then '0.0' else time_value end as float)) time_value from ${tableName}
+        where his_time like '%${queryDate}%'
+        and tagname in
+        <foreach collection="tagnameList" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        group by tagname
+    </select>
+
+    <insert id="batchInsertHistoryData">
+        insert into ${historyTableName} (tagname,time_value,his_date,his_time,cabinet_number)
+        values
+        <foreach collection="insertTimeJobList" index="index" item="item" separator=",">
+            ('${item.tagname}','${item.time_value}','${date}','${time}','${item.cabinet_number}')
+        </foreach>
+    </insert>
+
+    <insert id="batchInsertTimeJob">
+        insert into ${tableName} (realValue_tagname,realValue,date,time)
+        values
+        <foreach collection="ziCaiTimeJobList" index="index" item="item" separator=",">
+            ('${item.tagname}','${item.time_value}','${item.his_date}','${item.his_time}')
+        </foreach>
+    </insert>
+
+    <!--周期耗值新增-->
+    <insert id="batchInsertConsumeData">
+        <foreach collection="consumeDataList" index="index" item="item" separator=";">
+            insert into ${tableName} (tagname,time_value,his_date,his_time)
+            values
+            ('${item.tagname}',${item.time_value},'${item.his_date}','${item.his_time}')
+        </foreach>
+    </insert>
+
+    <!--周期耗值修改-->
+    <update id="batchUpdateConsumeData">
+        <foreach collection="consumeDataList" index="index" item="item" separator=";">
+            update ${tableName} set
+            time_value=${item.time_value},
+            his_date='${item.his_date}',
+            his_time='${item.his_time}'
+            where tagname='${item.tagname}' and his_time like '%${queryTime}%'
+        </foreach>
+    </update>
+
+    <update id="batchUpdateTimeJob">
+        <foreach collection="updateTimeJobList" index="index" item="item" separator=";">
+            update ${tableName} set
+            realValue='${item.time_value}',
+            date='${item.his_date}',
+            time='${item.his_time}'
+            where realValue_tagname='${item.tagname}'
+        </foreach>
+    </update>
+
+
+
+
+    <!--手输数据和自采数据############end-->
+
+    <!--五分钟一次的数据划分-->
+    <insert id="TimeJobBy5min" parameterType="com.byd.emg.pojo.TimeJob" >
+       insert into min_power (tagname,time_value,his_date,his_time,cabinet_number)
+       select realValue_tagname,realValue,'${date}','${time}',cabinet_number  from realValue_power_table
+       where realValue_tagname like '%EP%' or realValue_tagname like '%EQ%' or realValue_tagname like '%PF%'or realValue_tagname like '%P%'
+    </insert>
+
+    <insert id="insertXHLDWater" parameterType="java.lang.String" >
+       insert into history_xhldWater (state,startTime) values ('${stateNow}','${time}')
+    </insert>
+
+
+        <insert id="TimeJobByHour" parameterType="com.byd.emg.pojo.TimeJob" >
+           insert into hour_power (tagname,time_value,his_date,his_time,cabinet_number)
+           select realValue_tagname,realValue,'${date}','${time}',cabinet_number from realValue_power_table
+           where realValue_tagname like '%EP%' or realValue_tagname like '%EQ%' or realValue_tagname like '%PF%'or realValue_tagname like '%P%'
+        </insert>
+
+
+        <insert id="TimeJobByDay" parameterType="com.byd.emg.pojo.TimeJob" >
+           insert into day_power (tagname,time_value,his_date,his_time,cabinet_number)
+           select realValue_tagname,realValue,'${date}','${time}',cabinet_number from realValue_power_table
+           where realValue_tagname like '%EP%' or realValue_tagname like '%EQ%' or realValue_tagname like '%PF%'or realValue_tagname like '%P%'
+        </insert>
+
+
+<!--   电的历史记录查询-->
+
+
+
+    <insert id="TimeJobBy5min_circulatingWater" parameterType="com.byd.emg.pojo.TimeJob" >
+       insert into min_circulatingWater (tagname,time_value,his_date,his_time,cabinet_number)
+       select realValue_tagname,realValue,'${date}','${time}',cabinet_number  from realValue_circulatingWater_table
+       where realValue_tagname like '%EQ%' or realValue_tagname like '%TE%'
+    </insert>
+
+
+
+    <insert id="TimeJobByHour_circulatingWater" parameterType="com.byd.emg.pojo.TimeJob" >
+           insert into hour_circulatingWate(tagname,time_value,his_date,his_time,cabinet_number)
+           select realValue_tagname,realValue,'${date}','${time}',cabinet_number from realValue_circulatingWater_table
+          where realValue_tagname like '%EQ%' or realValue_tagname like '%TE%'
+        </insert>
+
+
+    <insert id="TimeJobByDay_circulatingWater" parameterType="com.byd.emg.pojo.TimeJob" >
+           insert into day_circulatingWate (tagname,time_value,his_date,his_time,cabinet_number)
+           select realValue_tagname,realValue,'${date}','${time}',cabinet_number from realValue_circulatingWater_table
+           where realValue_tagname like '%EQ%' or realValue_tagname like '%TE%'
+        </insert>
+
+
+    <!--   循环水的历史记录查询-->
+
+
+
+
+    <insert id="TimeJobBy5min_freezeWater" parameterType="com.byd.emg.pojo.TimeJob" >
+       insert into min_freezeWater (tagname,time_value,his_date,his_time,cabinet_number)
+       select realValue_tagname,realValue,'${date}','${time}',cabinet_number  from realValue_freezeWater_table
+       where realValue_tagname like '%EQ%' or realValue_tagname like '%TE%'
+    </insert>
+
+
+
+    <insert id="TimeJobByHour_freezeWater" parameterType="com.byd.emg.pojo.TimeJob" >
+           insert into hour_freezeWater(tagname,time_value,his_date,his_time,cabinet_number)
+           select realValue_tagname,realValue,'${date}','${time}',cabinet_number from realValue_freezeWater_table
+           where realValue_tagname like '%EQ%' or realValue_tagname like '%TE%'
+        </insert>
+
+
+    <insert id="TimeJobByDay_freezeWater" parameterType="com.byd.emg.pojo.TimeJob" >
+           insert into day_freezeWater (tagname,time_value,his_date,his_time,cabinet_number)
+           select realValue_tagname,realValue,'${date}','${time}',cabinet_number from realValue_freezeWater_table
+           where realValue_tagname like '%EQ%' or realValue_tagname like '%TE%'
+        </insert>
+
+
+    <!-- 冷冻水的历史记录查询-->
+    <insert id="TimeJobBy5min_fermentationAir" parameterType="com.byd.emg.pojo.TimeJob" >
+       insert into min_fermentationAir (tagname,time_value,his_date,his_time,cabinet_number)
+       select realValue_tagname,realValue,'${date}','${time}',cabinet_number  from realValue_fermentationAir_table
+       where realValue_tagname like '%EQ%' or realValue_tagname like '%EQ1%' or realValue_tagname like '%EQ2%'
+    </insert>
+
+
+
+    <insert id="TimeJobByHour_fermentationAir" parameterType="com.byd.emg.pojo.TimeJob" >
+           insert into hour_fermentationAir(tagname,time_value,his_date,his_time,cabinet_number)
+           select realValue_tagname,realValue,'${date}','${time}',cabinet_number from realValue_fermentationAir_table
+           where realValue_tagname like '%EQ%' or realValue_tagname like '%EQ1%' or realValue_tagname like '%EQ2%'
+        </insert>
+
+
+    <insert id="TimeJobByDay_fermentationAir" parameterType="com.byd.emg.pojo.TimeJob" >
+           insert into day_fermentationAir (tagname,time_value,his_date,his_time,cabinet_number)
+           select realValue_tagname,realValue,'${date}','${time}',cabinet_number from realValue_fermentationAir_table
+             where realValue_tagname like '%EQ%' or realValue_tagname like '%EQ1%' or realValue_tagname like '%EQ2%'
+        </insert>
+    <!-- 空气的历史记录查询-->
+    <insert id="TimeJobBy5min_steamMeter" parameterType="com.byd.emg.pojo.TimeJob" >
+       insert into min_steamMeter (tagname,time_value,his_date,his_time,cabinet_number)
+       select realValue_tagname,realValue,'${date}','${time}',cabinet_number  from realValue_steamMeter_table
+       where realValue_tagname like '%EQ%' or realValue_tagname like '%EQ1%' or realValue_tagname like '%EQ2%'
+    </insert>
+
+
+
+    <insert id="TimeJobByHour_steamMeter" parameterType="com.byd.emg.pojo.TimeJob" >
+           insert into hour_steamMeter(tagname,time_value,his_date,his_time,cabinet_number)
+           select realValue_tagname,realValue,'${date}','${time}',cabinet_number from realValue_steamMeter_table
+           where realValue_tagname like '%EQ%' or realValue_tagname like '%EQ1%' or realValue_tagname like '%EQ2%'
+        </insert>
+
+
+    <insert id="TimeJobByDay_steamMeter" parameterType="com.byd.emg.pojo.TimeJob" >
+           insert into day_steamMeter (tagname,time_value,his_date,his_time,cabinet_number)
+           select realValue_tagname,realValue,'${date}','${time}',cabinet_number from realValue_steamMeter_table
+             where realValue_tagname like '%EQ%' or realValue_tagname like '%EQ1%' or realValue_tagname like '%EQ2%'
+        </insert>
+
+
+    <!-- 蒸汽的历史记录查询-->
+    <insert id="TimeJobBy5min_tapWater" parameterType="com.byd.emg.pojo.TimeJob" >
+       insert into min_tapWater (tagname,time_value,his_date,his_time,cabinet_number)
+       select realValue_tagname,realValue,'${date}','${time}',cabinet_number  from realValue_tapWater_table
+       where realValue_tagname like '%EQ%' or realValue_tagname like '%REQ%'
+    </insert>
+
+    <insert id="TimeJobByHour_tapWater" parameterType="com.byd.emg.pojo.TimeJob" >
+           insert into hour_tapWater (tagname,time_value,his_date,his_time,cabinet_number)
+           select realValue_tagname,realValue,'${date}','${time}',cabinet_number from realValue_tapWater_table
+          where realValue_tagname like '%EQ%' or realValue_tagname like '%REQ%'
+        </insert>
+
+
+    <insert id="TimeJobByDay_tapWater" parameterType="com.byd.emg.pojo.TimeJob" >
+           insert into day_tapWater (tagname,time_value,his_date,his_time,cabinet_number)
+           select realValue_tagname,realValue,'${date}','${time}',cabinet_number from realValue_tapWater_table
+        where realValue_tagname like '%EQ%' or realValue_tagname like '%REQ%'
+        </insert>
+
+
+    <!-- 自来水的历史记录查询-->
+    <select id="selectSteam" parameterType="com.byd.emg.pojo.Steam" resultType="Steam">
+        select * from day_steamMeter where tagname='${num}' and his_date='${start_time}'
+    </select>
+
+    <insert id="insertSteam" parameterType="com.byd.emg.pojo.Steam">
+        insert into day_steamMeter (tagname,time_value,his_date) values ('${num}','${flow}','${start_time}')
+    </insert>
+
+    <update id="updateSteam" parameterType="com.byd.emg.pojo.Steam">
+        update day_steamMeter set time_value ='${flow}' where tagname='${num}' and his_date='${start_time}'
+    </update>
+
+    <select id="zssEletric" resultType="TimeJob">
+        select * from (
+        <foreach collection="tagnameList" index="index" item="item" separator="union all">
+            select top 1 * from day_power where tagname='${item}' and his_date  &gt;='${startDate}' and his_date &lt;='${endDate}'
+            and convert(decimal(38,2),cast(case time_value when '' then '0' when null then '0' else time_value end as float))>0  ${condition}
+        </foreach>) a
+    </select>
+
+    <select id="getSumData" resultType="TimeJob">
+        select sum(time_value) as time_value,tagname from ${datasourceTable}
+        where his_time like '%${queryDate}%' group by tagname
+    </select>
+
+</mapper>

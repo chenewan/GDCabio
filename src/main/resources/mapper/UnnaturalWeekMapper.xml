@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.byd.emg.mapper.UnnaturalWeekMapper">
+    <sql id="Base_Column_List">
+        id,productType,water,electricity,steam,startDate,endDate
+    </sql>
+
+    <select id="selectByTime" parameterType="java.lang.String" resultType="UnnaturalWeek">
+        select productType,water,electricity,steam,startDate+'至'+endDate as startDate
+        from unnatural_week_data
+        <where>
+            <if test="start_time_1!='' and end_time_1!=''">
+                and startDate &gt;='${start_time_1}' and startDate &lt;='${end_time_1}'
+                and  endDate &gt;='${start_time_1}' and endDate &lt;='${end_time_1}'
+            </if>
+        </where>
+    </select>
+
+    <select id="selectByList" parameterType="java.util.List" resultType="UnnaturalWeek">
+        select
+          <include refid="Base_Column_List" />
+        from unnatural_week_data where
+        productType in
+        <foreach collection="unnaturalWeekList" index="index" item="item" open="(" separator="," close=")">
+            '${item.productType}'
+        </foreach>
+        and startDate+' '+endDate in
+        <foreach collection="unnaturalWeekList" index="index" item="item" open="(" separator="," close=")">
+            '${item.startDate}'+' '+'${item.endDate}'
+        </foreach>
+    </select>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        insert into unnatural_week_data (productType,water,electricity,steam,startDate,endDate)
+        values
+        <foreach collection="unnaturalWeekList" index="index" item="item" separator=",">
+            ('${item.productType}', '${item.water}','${item.electricity}', '${item.steam}', '${item.startDate}','${item.endDate}')
+        </foreach>
+    </insert>
+</mapper>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.byd.emg.mapper.HistoryRecordMapper" >
+    <sql id="HistoryRecord_Column_List">
+        id,his_tagname,real_time_value,time
+    </sql>
+
+    <resultMap id="historyRecordsResultMap" type="com.byd.emg.pojo.TimeJob" >
+        <id column="id" property="id" />
+        <result column="tagname" property="tagname"/>
+        <result column="time_value" property="time_value"/>
+        <result column="his_date" property="his_date"/>
+        <result column="his_time" property="his_time"/>
+        <result column="cabinet_number" property="cabinet_number"/>
+    </resultMap>
+
+    <!--根据tagname和日期来查询当天的历史记录-->
+    <select id="getHistoryRecordByTagnameList" resultType="TimeJob">
+        <foreach collection="historyParameterList" index="index" item="item" separator="UNION ALL">
+            SELECT
+            ${time_value},his_date,his_time,cabinet_number,tagname
+            FROM
+            ${item.table_name}
+            WHERE
+            tagname ='${item.ca_number}'+'${item.type}'
+            AND
+            his_date &gt;= '${startDate}'
+            AND
+            his_date &lt;='${endDate}'
+        </foreach>
+        order by his_date asc,his_time asc
+    </select>
+
+    <select id="selectData" resultType="RealValue">
+        select * from ${tableName}
+    </select>
+
+    <!--根据tagname和日期来查询当天的历史记录-->
+    <select id="getHistoryRecordByTagname"  resultType="java.lang.String">
+    SELECT
+	time_value
+FROM
+	${table_name}
+WHERE
+	tagname ='${cn1}'+'${type}'
+AND
+	cabinet_number= '${cn1}'
+AND
+	his_date BETWEEN '${startDate}'
+AND '${endDate}'
+ORDER BY id
+
+    </select>
+
+
+
+    <select id="getHistoryRecordByTagnameToHour"   resultType="java.lang.String">
+        SELECT
+        time_value
+        FROM
+        ${table_name}
+        WHERE
+      	tagname ='${cn1}'+'${type}'
+        AND
+	    cabinet_number= '${cn1}'
+        AND
+        his_date BETWEEN '${startDate}'
+        AND '${endDate}'
+        ORDER BY id
+    </select>
+
+
+    <select id="getHistoryRecordByTagnameToDay"    resultType="java.lang.String">
+        SELECT
+        time_value
+        FROM
+        ${table_name}
+        WHERE
+     	tagname ='${cn1}'+'${type}'
+        AND
+	    cabinet_number= '${cn1}'
+        AND
+        his_date BETWEEN '${startDate}'
+        AND '${endDate}'
+        ORDER BY id
+    </select>
+
+<!--测试自来水的同比分析 -->
+    <select id="getHistoryRecordAnalysis"    resultType="java.lang.String">
+        SELECT
+        time_value
+        FROM
+      day_tapWater
+        WHERE
+     	tagname ='${cabinet_number}'+'${type}'
+        AND
+	    cabinet_number= '${cabinet_number}'
+        AND
+        his_date ='${date}'
+        ORDER BY id
+    </select>
+
+    <!--测试自来水的同比分析 -->
+    <select id="getdescribe"    resultType="java.lang.String">
+      SELECT describe FROM real_original_table WHERE tagname = '${cabinet_number}'+'${type}'
+    </select>
+
+    <select id="getminbymin"    resultMap="historyRecordsResultMap">
+        SELECT tagname,time_value,cabinet_number ,(his_date+'  '+his_time) AS time  FROM ${table_name}
+        WHERE time_value =
+        (SELECT
+          min (time_value)
+        FROM
+            ${table_name}
+        WHERE
+            tagname ='${cn1}'+'${type}'
+        AND
+            cabinet_number= '${cn1}'
+        AND
+            his_date BETWEEN  '${startDate}'
+        AND  '${endDate}'
+        AND his_time BETWEEN  '${startTime}'
+        AND  '${endTime}')
+        AND tagname = '${cn1}'+'${type}'
+ORDER BY id
+    </select>
+
+
+    <select id="getmaxbymin"    resultMap="historyRecordsResultMap">
+        SELECT  tagname,time_value,cabinet_number ,(his_date+'  '+his_time)AS time FROM ${table_name}
+        WHERE time_value =
+        (SELECT
+          max (time_value)
+        FROM
+            ${table_name}
+        WHERE
+            tagname ='${cn1}'+'${type}'
+        AND
+            cabinet_number= '${cn1}'
+        AND
+            his_date BETWEEN  '${startDate}'
+        AND  '${endDate}'
+        AND his_time BETWEEN  '${startTime}'
+        AND  '${endTime}')
+        AND tagname = '${cn1}'+'${type}'
+        ORDER BY id
+    </select>
+
+    <!--查询数据中最小的时间-->
+    <select id="selectMinTime" parameterType="java.lang.String" resultType="java.lang.String">
+        select min(his_date+' '+his_time)  from ${table_name}
+    </select>
+
+    <!--查询数据中最大的时间-->
+    <select id="selectMaxTime" parameterType="java.lang.String" resultType="java.lang.String">
+        select max(his_date+' '+his_time)  from ${table_name}
+    </select>
+
+
+</mapper>
+
+

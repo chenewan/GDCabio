@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.byd.emg.mapper.HistoryTankBatchNoMapper">
+    <sql id="Base_Column_List" >
+        id,tankNumber,batchNumber,steamTotalFlowStart,steamTotalFlowEnd,airTotalFlowStart,airTotalFlowEnd,productType,media,steamCostValue,
+        airCostValue,startTime,endTime
+    </sql>
+
+    <select id="selectHistoryData" parameterType="java.util.List" resultType="HistoryTankBatchNo">
+      select
+        <include refid="Base_Column_List" />
+      from history_tankBatchNo
+      where tankNumber in
+      <foreach collection="startStateList" index="index" item="item" open="(" separator="," close=")">
+            '${item.tankNumber}'
+      </foreach>
+        and batchNumber in
+        <foreach collection="startStateList" index="index" item="item" open="(" separator="," close=")">
+            '${item.batchNumber}'
+        </foreach>
+    </select>
+
+    <select id="countTankNumbers" resultType="java.lang.String">
+        select count(*) from history_tankBatchNo
+        where tankNumber in
+        <foreach collection="tankNumberList" index="index" item="item" open="(" separator="," close=")">
+            '${item}'
+        </foreach>
+        and endTime &gt;='${startDate}' and endTime &lt;='${endDate}'
+    </select>
+
+    <select id="countSpanNumbers"  resultType="java.lang.String">
+        select count(*) from history_tankBatchNo
+        where tankNumber in
+        <foreach collection="tankNumberList" index="index" item="item" open="(" separator="," close=")">
+            '${item}'
+        </foreach>
+        and startTime &lt;='${endDate}' and endTime &gt;='${endDate}'
+    </select>
+
+    <select id="getTotalAir" parameterType="java.lang.String" resultType="java.lang.String">
+        select ${field} from history_tankBatchNo
+        <where>
+            <if test="true">
+                startTime &gt;='${startDate}' and startTime &lt;='${endDate}'
+                and endTime &gt;='${startDate}' and endTime &lt;='${endDate}'
+            </if>
+            <if test="type!='' and type!=null ">
+                and productType like '%${type}%'
+            </if>
+        </where>
+    </select>
+
+    <select id="getTotalAirCrossMonth" parameterType="java.lang.String" resultType="HistoryTankBatchNo">
+        select * from history_tankBatchNo
+        <where>
+
+            ((startTime &gt;='${startDate}' and startTime &lt;='${endDate}' and endTime &gt;'${endDate}')
+                or (startTime &lt;'${startDate}' and endTime &gt;='${startDate}' and endTime &lt;='${endDate}')
+                or(startTime &lt;'${startDate}'and endTime &gt;'${endDate}'))
+
+            <if test="type!='' and type!=null ">
+                and productType like '%${type}%'
+            </if>
+        </where>
+    </select>
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        <foreach collection="hisUpdateList" index="index" item="item" separator=";">
+            update history_tankBatchNo set
+            steamTotalFlowEnd='${item.steamTotalFlowEnd}',
+            airTotalFlowEnd='${item.airTotalFlowEnd}',
+            media='${item.media}',
+            steamCostValue='${item.steamCostValue}',
+            airCostValue='${item.airCostValue}',
+            state='${item.state}',
+            endTime='${item.endTime}'
+            where tankNumber='${item.tankNumber}' and batchNumber='${item.batchNumber}'
+        </foreach>
+    </update>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        insert into history_tankBatchNo (tankNumber,batchNumber,steamTotalFlowStart,airTotalFlowStart,productType,state,startTime)
+        values
+        <foreach collection="startStateList" index="index" item="item" separator=",">
+            ('${item.tankNumber}','${item.batchNumber}','${item.steamTotalFlow}','${item.airTotalFlow}','${item.productType}',
+            '${item.state}','${item.time}')
+        </foreach>
+    </insert>
+
+</mapper>

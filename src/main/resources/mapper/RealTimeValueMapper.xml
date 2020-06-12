@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.byd.emg.mapper.RealTimeValueMapper" >
+    <sql id="RealValue_Column_List" >
+        realValue_id,realValue_tagname,realValue,time
+    </sql>
+
+    <resultMap id="realTimeResultMap" type="com.byd.emg.pojo.RealValue" >
+        <id column="realValue_id" property="realValue_id" />
+        <result column="realValue_tagname" property="realValue_tagname"/>
+        <result column="realValue" property="realValue"/>
+        <result column="time" property="time"/>
+        <result column="date" property="date"/>
+    </resultMap>
+
+    <!--查询页面上所显示的仪表盘的实时值-->
+    <select id="findRealTimeValueAll" resultMap="realTimeResultMap">
+        SELECT
+        <include refid="RealValue_Column_List" />
+        FROM realValue_power_table realVal,monitoring_dashboard_power_table dashboard,real_original_table resource
+        WHERE realVal.realValue_tagname=dashboard.dash_tagname AND dashboard.dash_tagname=resource.tagname
+        ORDER BY dashboard.tz_id;
+    </select>
+
+    <select id="findRealTimeValueByTagname" parameterType="com.byd.emg.pojo.RealValue" resultMap="realTimeResultMap">
+        SELECT
+
+        <include refid="RealValue_Column_List" />
+        FROM realValue_power_table realVal WHERE realVal.realValue_tagname='${realTagname}';
+
+    </select>
+    <select id="findRealTimeValueByTagnameList" parameterType="java.util.List" resultMap="realTimeResultMap">
+        SELECT
+        <include refid="RealValue_Column_List" />
+        FROM realValue_power_table realVal left  JOIN monitoring_dashboard_power_table dashboard ON dashboard.dash_tagname = realVal.realValue_tagname
+        WHERE
+        realVal.realValue_tagname IN
+        <foreach collection="tagnameList" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY 	dashboard.monitoring_id;
+    </select>
+
+    <select id="selectByTagnameList" resultType="RealValue">
+        select
+        <include refid="RealValue_Column_List" />
+        from ${tableName} where realValue_tagname in
+        <foreach collection="tagnameList" index="index" item="item"
+                 open="(" separator="," close=")">
+            '${item}'
+        </foreach>
+    </select>
+
+    <select id="getRealValueList" resultType="RealValue">
+        select
+        <include refid="RealValue_Column_List" />
+        from realValue_power_table where realValue_tagname in
+        <foreach collection="equipmentStatesList" index="index" item="item"
+                 open="(" separator="," close=")">
+            '${item.realTagName}'
+        </foreach>
+    </select>
+
+
+
+</mapper>

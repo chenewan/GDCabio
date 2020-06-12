@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.byd.emg.mapper.DataMonitoringDashboardMapper" >
+
+    <sql id="ResourceMeter_Column_List" >
+        id,num,tagname,max_value,min_value,describe,area,workshop,unit_symbol,type
+    </sql>
+    <sql id="TzDataMonitoringDashboard_Column_List" >
+        tz_id,dash_tagname,upper_limit,lower_limit
+    </sql>
+
+    <resultMap id="resourceMeterPageResultMap" type="com.byd.emg.pojo.ResourceMeter" >
+        <!-- 一对一关系的主表(real_tz_original_table)  ResourceMeter-->
+        <id column="id" property="id" />
+        <result column="num" property="num" />
+        <result column="tagname" property="tagname" />
+        <result column="max_value" property="maxValue" />
+        <result column="min_value" property="minValue" />
+        <result column="describe" property="describe" />
+        <result column="area" property="area" />
+        <result column="workshop" property="workShop" />
+        <result column="unit_symbol" property="unitSymbol" />
+        <result column="type" property="type" />
+
+        <association property="DataMonitoringDashboard" javaType="com.byd.emg.pojo.DataMonitoringDashboard">
+            <id column="monitoring_id" property="monitoring_id" />
+            <result column="dash_tagname" property="dash_tagname" />
+            <result column="upper_limit" property="upper_limit" />
+            <result column="lower_limit" property="lower_limit" />
+            <result column="customname" property="customname" />
+            <result column="name_display" property="name_display" />
+        </association>
+
+    </resultMap>
+
+
+
+
+    <!--查询所有的电表信息-->
+    <select id="findEnergyMeterPageAll" resultMap="resourceMeterPageResultMap">
+
+        select t1.* from(
+        SELECT dashboard.monitoring_id,dashboard.dash_tagname,dashboard.upper_limit,dashboard.lower_limit,dashboard.customname,
+        dashboard.name_display,
+        resource.id,
+        resource.num,resource.tagname,resource.max_value,resource.min_value,resource.describe,resource.area,
+        resource.workshop,resource.unit_symbol,resource.type,resource.cabinet_number
+        FROM monitoring_dashboard_power_table dashboard INNER JOIN real_original_table resource ON
+        dashboard.dash_tagname=resource.tagname
+        <where>
+            resource.cabinet_number in
+            <foreach collection="cabinet_number" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+
+        </where>
+        )    t1
+
+        <where>
+            <if test="Search_parameters!='' and Search_parameters!=null">
+                t1.customname like '%${Search_parameters}%'
+                or
+                t1.dash_tagname like '%${Search_parameters}%'
+                or
+                t1.describe like '%${Search_parameters}%'
+            </if>
+        </where>
+        ORDER BY t1.monitoring_id
+    </select>
+
+    <select id="findTagname" resultType="java.lang.String">
+        SELECT
+        tagname
+        FROM real_original_table
+
+    </select>
+
+    <select id="findDescribe" resultMap="resourceMeterPageResultMap">
+  SELECT dashboard.monitoring_id,dashboard.dash_tagname,dashboard.upper_limit,dashboard.lower_limit,dashboard.customname, dashboard.name_display,
+
+   resource.id,resource.num,resource.tagname,resource.max_value,resource.min_value,resource.describe,resource.area,resource.workshop,resource.unit_symbol,resource.type
+
+  FROM monitoring_dashboard_power_table dashboard INNER JOIN real_original_table resource ON dashboard.dash_tagname=resource.tagname
+
+
+    where dashboard.dash_tagname= '${tagname}'
+
+    </select>
+</mapper>

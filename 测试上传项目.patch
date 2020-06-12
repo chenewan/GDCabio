@@ -1,0 +1,15 @@
+Index: src/main/java/com/byd/emg/common/TimerJobs.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/byd/emg/common/TimerJobs.java	(date 1558924337000)
++++ src/main/java/com/byd/emg/common/TimerJobs.java	(date 1558925737235)
+@@ -23,6 +23,7 @@
+     System.out.println(time);
+     timeJobMapper.TimeJobBy5min(date,time);
+ 
++
+     System.out.print("整理五分钟数据成功");
+ }
+ 

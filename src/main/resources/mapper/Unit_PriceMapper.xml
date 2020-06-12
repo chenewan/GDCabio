@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.byd.emg.mapper.Unit_PriceMapper" >
+    <resultMap id="Unit_PriceList" type="com.byd.emg.pojo.Unit_Price" >
+        <id column="id" property="id" />
+        <result column="peak_electricity_price" property="peak_electricity_price"/>
+        <result column="peacetime_electricity_price" property="peacetime_electricity_price"/>
+        <result column="troughtime_electricity_price" property="troughtime_electricity_price"/>
+        <result column="price" property="price"/>
+        <result column="power_price" property="power_price"/>
+        <result column="times" property="times"/>
+    </resultMap>
+
+    <!--峰平谷电价-->
+    <select id="getPowerUnit_Price"  resultType="com.byd.emg.pojo.Unit_Price">
+  select id, peak_electricity_price,peacetime_electricity_price,troughtime_electricity_price,start_time as times from Unit_Price_Power   ORDER BY start_time DESC
+    </select>
+    <!--水-->
+    <select id="getWaterUnit_Price"  resultType="com.byd.emg.pojo.Unit_Price">
+  select id, price,start_time as times from Unit_Price_water ORDER BY start_time DESC
+    </select>
+    <!--蒸汽-->
+    <select id="getSteamUnit_Price"  resultType="com.byd.emg.pojo.Unit_Price">
+ select id, price,start_time as times from Unit_Price_steam ORDER BY start_time DESC
+    </select>
+
+    <!--循环水-->
+    <select id="getCirculatWaterUnit_Price" resultType="com.byd.emg.pojo.Unit_Price">
+        select id, price,start_time as times from Unit_Price_CirculatingWater ORDER BY start_time DESC
+    </select>
+
+    <!--冷冻水-->
+    <select id="getFreezeWaterUnit_Price" resultType="com.byd.emg.pojo.Unit_Price">
+        select id, price,start_time as times from Unit_Price_freezeWater ORDER BY start_time DESC
+    </select>
+
+    <!--发酵空气-->
+    <select id="getFermentationAirUnit_Price" resultType="com.byd.emg.pojo.Unit_Price">
+        select id, price,start_time as times from Unit_Price__fermentationAir ORDER BY start_time DESC
+    </select>
+
+    <!--根据起始时间查询对应的单价-->
+    <select id="selectUnitPrice" resultType="java.lang.Double">
+        select top 1 case price when '' then '0.0' when null then '0.0' else price end from ${tableName}
+--         where start_time &lt;='${endDate}'
+        order by start_time desc
+    </select>
+
+    <!--查询单价-->
+    <select id="getUnitPrice" resultType="java.lang.Double">
+        select top 1  price  from ${tableName}
+--         where start_time like '%${start_t}%'
+        order by start_time desc
+    </select>
+
+    <select id="selectByTime" parameterType="java.lang.String" resultMap="Unit_PriceList">
+        select id,peak_electricity_price,peacetime_electricity_price,troughtime_electricity_price,start_time,
+        end_time from Unit_Price_Power where start_time='${start_time}'
+    </select>
+
+    <select id="getUnitPriceByTime" parameterType="java.lang.String" resultMap="Unit_PriceList">
+        select id,price,start_time,end_time from ${tableName} where start_time like '%${start_time}%'
+    </select>
+
+    <select id="unitPriceRecords" parameterType="java.lang.String" resultMap="Unit_PriceList">
+        select top 1 id,price,start_time from ${tableName}
+        <!--<where>-->
+            <!--<if test="start_time!='' and start_time!=null">-->
+                <!--and start_time like '%${start_time}%'-->
+            <!--</if>-->
+        <!--</where>-->
+        order by id desc
+    </select>
+
+    <select id="powerUnit_PriceRecords" parameterType="java.lang.String" resultMap="Unit_PriceList">
+        select top 1 id,power_price,peak_electricity_price,peacetime_electricity_price,troughtime_electricity_price,start_time from Unit_Price_Power
+        <!--from ${tableName}-->
+        <!--<where>-->
+            <!--<if test="start_time!='' and start_time!=null">-->
+                <!--and start_time like '%${start_time}%'-->
+            <!--</if>-->
+        <!--</where>-->
+        <!--order by start_time desc-->
+    </select>
+
+    <select id="selectPowerUnit_Price" parameterType="com.byd.emg.pojo.Unit_Price" resultType="Unit_Price">
+        select top 1 id,power_price,peak_electricity_price,peacetime_electricity_price,troughtime_electricity_price from Unit_Price_Power
+    </select>
+
+
+    <select id="getIDFromPowerUnit_Price" parameterType="java.lang.String" resultType="java.lang.Long">
+        select  id from Unit_Price_Power
+--         WHERE start_time='${start_time}'
+    </select>
+
+    <!--获取最后一刻的单价，下月自动存储-->
+    <select id="getLastUnit_Price" parameterType="java.lang.String" resultType="Unit_Price">
+        select top 1 * from ${tableName} order by start_time desc
+    </select>
+
+    <insert id="addPowerUnit_Price" parameterType="com.byd.emg.pojo.Unit_Price" >
+       insert into Unit_Price_Power (peak_electricity_price,peacetime_electricity_price,troughtime_electricity_price,start_time)
+     values
+     ('${peak_electricity_price}','${peacetime_electricity_price}','${troughtime_electricity_price}','${start_time}')
+    </insert>
+
+    <update id="updatePowerUnit_Price" parameterType="com.byd.emg.pojo.Unit_Price">
+        update Unit_Price_Power
+        <set>
+            <if test="power_price!='' and power_price!=null">
+                power_price='${power_price}',
+            </if>
+            <if test="peak_electricity_price!='' and peak_electricity_price!=null">
+                peak_electricity_price='${peak_electricity_price}',
+            </if>
+            <if test="peacetime_electricity_price!='' and peacetime_electricity_price!=null">
+                peacetime_electricity_price='${peacetime_electricity_price}',
+            </if>
+            <if test="troughtime_electricity_price!='' and troughtime_electricity_price!=null">
+                troughtime_electricity_price='${troughtime_electricity_price}',
+            </if>
+            <if test="start_time!='' and start_time!=null">
+                start_time='${start_time}'
+            </if>
+        </set>
+    </update>
+
+
+
+    <update id="batchUpdateUnit_Price" parameterType="java.util.List">
+        <foreach collection="unit_priceList" index="index" item="item" separator=";">
+            update Unit_Price_Power set
+            peak_electricity_price='${item.peak_electricity_price}',
+            peacetime_electricity_price='${item.peacetime_electricity_price}',
+            troughtime_electricity_price='${item.troughtime_electricity_price}',
+            start_time='${item.start_time}'
+            where id=${item.id}
+        </foreach>
+    </update>
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        <foreach collection="unit_priceList" index="index" item="item" separator=";">
+            update ${tableName} set
+            price='${item.price}'
+            where id=${item.id}
+        </foreach>
+    </update>
+
+    <update id="updateUnit_Price">
+        update ${tableName} set
+        price='${unit_price.price}',
+        start_time='${unit_price.start_time}'
+        where id=${unit_price.id}
+    </update>
+
+    <delete id="deleteUnit_PriceById" parameterType="java.lang.Long">
+        delete from ${tableName} where id=${id}
+    </delete>
+
+
+    <delete id="deletePowerUnit_Price" parameterType="java.lang.Long">
+        delete from Unit_Price_Power where id=${id}
+    </delete>
+
+    <insert id="addWaterUnit_Price" parameterType="com.byd.emg.pojo.Unit_Price" >
+       insert into Unit_Price_water (price,start_time)
+        values
+       ('${price}','${start_time}')
+    </insert>
+
+    <insert id="addNaturalGasUnit_Price" parameterType="com.byd.emg.pojo.Unit_Price" >
+       insert into Unit_Price_NaturalGas (price,start_time)
+        values
+        ('${price}','${start_time}')
+    </insert>
+
+    <insert id="addSteamUnit_Price" parameterType="com.byd.emg.pojo.Unit_Price" >
+       insert into Unit_Price_steam (price,start_time)
+        values
+        ('${price}','${start_time}')
+    </insert>
+
+    <insert id="addCirculatingWaterUnit_Price" parameterType="com.byd.emg.pojo.Unit_Price">
+        insert into Unit_Price_CirculatingWater (price,start_time)
+        values
+        ('${price}','${start_time}')
+    </insert>
+
+    <insert id="addFreezeWaterUnit_Price" parameterType="com.byd.emg.pojo.Unit_Price">
+        insert into Unit_Price_freezeWater (price,start_time)
+        values
+       ('${price}','${start_time}')
+    </insert>
+
+    <insert id="addFermentationAirUnit_Price" parameterType="com.byd.emg.pojo.Unit_Price">
+        insert into Unit_Price__fermentationAir (price,start_time)
+        values
+        ('${price}','${start_time}')
+    </insert>
+
+    <insert id="insertComprehensivePricepower" parameterType="java.lang.String">
+        insert into Comprehensive_Price_power (price,start_time) values ('${unitPricePower}','${date}')
+    </insert>
+
+    <update id="updatePowerUnit_Price_times" parameterType="com.byd.emg.pojo.Unit_Price" >
+        update Unit_Price_Power set end_time ='${start_time}'where id=(select max(id) from Unit_Price_Power)
+    </update>
+
+    <update id="updateWaterUnit_Price_times" parameterType="com.byd.emg.pojo.Unit_Price" >
+        update Unit_Price_water set end_time ='${start_time}'where id=(select max(id) from Unit_Price_water)
+    </update>
+
+    <update id="updateNaturalGasUnit_Price_times" parameterType="com.byd.emg.pojo.Unit_Price" >
+        update Unit_Price_NaturalGas set end_time ='${start_time}'where id=(select max(id) from Unit_Price_NaturalGas)
+    </update>
+
+    <update id="updateSteamUnit_Price_times" parameterType="com.byd.emg.pojo.Unit_Price" >
+        update Unit_Price_steam set end_time ='${start_time}'where id=(select max(id) from Unit_Price_steam)
+    </update>
+
+    <update id="updateCirculatingWaterUnit_Price_times" parameterType="com.byd.emg.pojo.Unit_Price" >
+        update Unit_Price_CirculatingWater set end_time ='${start_time}'where id=(select max(id) from Unit_Price_CirculatingWater)
+    </update>
+
+    <update id="updateFreezeWaterUnit_Price" parameterType="com.byd.emg.pojo.Unit_Price" >
+        update Unit_Price_freezeWater set end_time ='${start_time}'where id=(select max(id) from Unit_Price_freezeWater)
+    </update>
+
+    <update id="updateFermentationAirUnit_Price_times" parameterType="com.byd.emg.pojo.Unit_Price" >
+        update Unit_Price__fermentationAir set end_time ='${start_time}'where id=(select max(id) from Unit_Price__fermentationAir)
+    </update>
+</mapper>
+

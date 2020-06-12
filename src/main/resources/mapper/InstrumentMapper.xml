@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.byd.emg.mapper.InstrumentMapper">
+
+    <select id="instrumentAll" parameterType="java.lang.String" resultType="Instrument">
+        select id,tagname,describe,cycle,realValue,startDate,endDate,updatetime from hand_records
+        <where>
+            <if test="key!='' and key!=null">
+                and describe+tagname like '%${key}%'
+            </if>
+            <if test="way!='' and way!=null">
+                and cycle like '%${way}%'
+            </if>
+        </where>
+    </select>
+
+    <select id="selectByTagnameList" parameterType="java.lang.String" resultType="Instrument">
+        select distinct tagname,realValue,startValue,endValue from hand_records where startDate &gt;='${startDate}' and startDate &lt;='${endDate}'
+        and endDate &gt;='${startDate}' and endDate &lt;='${endDate}'
+        and upper(tagname) in
+        <foreach collection="tagnameList" index="index" item="item" open="(" separator="," close=")">
+            '${item}'
+        </foreach>
+    </select>
+
+    <select id="selectByInstrument" parameterType="com.byd.emg.pojo.Instrument" resultType="Instrument">
+        select id,tagname,describe,cycle,realValue,startDate,endDate,updatetime from hand_records
+        where tagname='${tagname}'
+    </select>
+
+    <select id="getTagnameOrDescribe" parameterType="java.lang.String" resultType="Instrument">
+        select tagname,describe from real_original_table
+        <where>
+            <if test="key!='' and key!=null">
+                and describe like '%${key}%' or tagname like '%${key}%'
+            </if>
+            <if test="key=='' or key==null">
+                or tagname like '%EQ%' or tagname like '%EQ1%' or tagname like '%EQ2%' or tagname like '%ALL%'
+                or tagname like '%EP%'
+                or tagname like '%TE%'
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertInstrument" parameterType="com.byd.emg.pojo.Instrument">
+        insert into hand_records (tagname,describe,cycle,realValue,startDate,endDate,updatetime)
+        values ('${tagname}','${describe}','${cycle}','${realValue}','${startDate}',
+        '${endDate}','${updatetime}')
+    </insert>
+
+    <update id="updateInstrumentById" parameterType="com.byd.emg.pojo.Instrument">
+        update hand_records set
+        cycle='${cycle}',
+        realValue='${realValue}',
+        updatetime='${updatetime}',
+        startDate='${startDate}',
+        endDate='${endDate}'
+        where id=${id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        delete from hand_records where id=#{id}
+    </delete>
+
+</mapper>

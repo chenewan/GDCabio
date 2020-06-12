@@ -1,0 +1,130 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.byd.emg.mapper.GjtYieldMapper">
+    <sql id="Base_Column_List" >
+        id,productType,yields,startDate,endDate,produceDays,bigPotNumbers,middlePotNumbers,smallPotNumbers,bigSpanNumbers,middleSpanNumbers,smallSpanNumbers,unitPricePower,
+        unitPriceWater,unitPriceCircuWater,unitPriceFreezeWater,unitPriceSteam,unitPriceAir
+    </sql>
+
+    <select id="selectEnergyData" resultType="com.byd.emg.resultData.GjtEnergyData">
+        select ${fields} from ${tableName} order by startDate asc
+    </select>
+
+    <select id="selectByTimes" parameterType="com.byd.emg.pojo.GjtYield" resultType="java.lang.Integer">
+        select id from gjt_yield where startDate='${gjtYield.startDate}' and endDate='${gjtYield.endDate}'
+        and productType='${gjtYield.productType}'
+    </select>
+
+    <select id="selectTotalYields" resultType="java.lang.Double">
+        select sum(cast(yields as float))
+        from ${tableName}
+    </select>
+
+    <select id="selectEnergyDataConditon" resultType="com.byd.emg.resultData.GjtEnergyData">
+        select ${fields} from ${tableName}
+        <where>
+            and startDate &gt;='${startDate}' and startDate &lt;='${endDate}'
+            and endDate &gt;='${startDate}' and endDate &lt;='${endDate}'
+            <if test="productType!='' and productType!=null">
+                and productType like '%${productType}%'
+            </if>
+        </where>
+        order by startDate asc
+    </select>
+
+    <select id="selectGjtYields" resultType="GjtYield">
+      select * from ${tableName}
+        <where>
+            and startDate &gt;='${startDate}' and startDate &lt;='${endDate}'
+            and endDate &gt;='${startDate}' and endDate &lt;='${endDate}'
+            <if test="type!='' and type!=null">
+                and productType like '%${type}%'
+            </if>
+        </where>
+    </select>
+
+    <select id="selectTotalYieldsCondition" resultType="java.lang.Double">
+        select sum(cast(yields as float))
+        from ${tableName}
+        <where>
+            and startDate &gt;='${startDate}' and startDate &lt;='${endDate}'
+            and endDate &gt;='${startDate}' and endDate &lt;='${endDate}'
+            <if test="productType!='' and productType!=null">
+                and productType like '%${productType}%'
+            </if>
+        </where>
+    </select>
+
+    <select id="selectByProductType" parameterType="java.lang.String" resultType="GjtYield">
+        select ${topMethod}
+        <include refid="Base_Column_List" />
+        from gjt_yield
+        <where>
+            <if test="date!='' and date!=null">
+                and startDate like '%${date}%'
+            </if>
+            <if test="productType!='' and productType!=null">
+                and productType like '%${productType}%'
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertGjtYield" parameterType="com.byd.emg.pojo.GjtYield">
+        insert into gjt_yield (productType,yields,startDate,endDate,produceDays,bigPotNumbers,middlePotNumbers,smallPotNumbers,bigSpanNumbers,middleSpanNumbers,smallSpanNumbers,
+        unitPricePower,unitPriceWater,unitPriceCircuWater,unitPriceFreezeWater,unitPriceSteam,unitPriceAir)
+        values ('${productType}','${yields}','${startDate}','${endDate}','${produceDays}','${bigPotNumbers}','${middlePotNumbers}','${smallPotNumbers}','${bigSpanNumbers}',
+        '${middleSpanNumbers}','${smallSpanNumbers}','${unitPricePower}','${unitPriceWater}','${unitPriceCircuWater}','${unitPriceFreezeWater}','${unitPriceSteam}'
+        ,'${unitPriceAir}')
+    </insert>
+
+    <update id="batchUpdateByIds" parameterType="java.util.List">
+        update gjt_yield set
+        yields='${gjtYield.yields}',
+        produceDays='${gjtYield.produceDays}',
+        bigPotNumbers='${gjtYield.bigPotNumbers}',
+        middlePotNumbers='${gjtYield.middlePotNumbers}',
+        smallPotNumbers='${gjtYield.smallPotNumbers}',
+        bigSpanNumbers='${gjtYield.bigSpanNumbers}',
+        middleSpanNumbers='${gjtYield.middleSpanNumbers}',
+        smallSpanNumbers='${gjtYield.smallSpanNumbers}',
+        unitPricePower='${gjtYield.unitPricePower}',
+        unitPriceWater='${gjtYield.unitPriceWater}',
+        unitPriceCircuWater='${gjtYield.unitPriceCircuWater}',
+        unitPriceFreezeWater='${gjtYield.unitPriceFreezeWater}',
+        unitPriceSteam='${gjtYield.unitPriceSteam}',
+        unitPriceAir='${gjtYield.unitPriceAir}'
+        where id in
+        <foreach collection="ids" index="index" item="item"
+                 open="(" separator="," close=")">
+            ${item}
+        </foreach>
+    </update>
+
+    <update id="updateGjtYield" parameterType="com.byd.emg.pojo.GjtYield">
+        update gjt_yield set
+        yields='${gjtYield.yields}',
+        produceDays='${gjtYield.produceDays}',
+        bigPotNumbers='${gjtYield.bigPotNumbers}',
+        middlePotNumbers='${gjtYield.middlePotNumbers}',
+        smallPotNumbers='${gjtYield.smallPotNumbers}',
+        bigSpanNumbers='${gjtYield.bigSpanNumbers}',
+        middleSpanNumbers='${gjtYield.middleSpanNumbers}',
+        smallSpanNumbers='${gjtYield.smallSpanNumbers}',
+        unitPricePower='${gjtYield.unitPricePower}',
+        unitPriceWater='${gjtYield.unitPriceWater}',
+        unitPriceCircuWater='${gjtYield.unitPriceCircuWater}',
+        unitPriceFreezeWater='${gjtYield.unitPriceFreezeWater}',
+        unitPriceSteam='${gjtYield.unitPriceSteam}',
+        startDate='${gjtYield.startDate}',
+        endDate='${gjtYield.endDate}',
+        unitPriceAir='${gjtYield.unitPriceAir}'
+        where id=${gjtYield.id}
+    </update>
+
+    <delete id="deleteGjtById" parameterType="java.lang.Long">
+        delete from gjt_yield where id=${id}
+    </delete>
+
+
+
+
+</mapper>

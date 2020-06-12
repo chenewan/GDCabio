@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.byd.emg.mapper.CirculateWaterMapper" >
+
+    <sql id="Base_Column_List" >
+        id,super_id,tag_name,device_name,water_consumption,cost
+    </sql>
+
+    <!--根据"位号"或"设备名"查询对应的数据-->
+    <select id="selectByTag_name" parameterType="java.lang.String" resultType="com.byd.emg.pojo.CirculateWater">
+        select
+          <include refid="Base_Column_List" />
+        from circulate_water where ${query_criteria}
+    </select>
+
+    <!--根据super_id查询对应的数据-->
+    <select id="selectByCirculateWaterBySuper_Id" parameterType="java.lang.Long" resultType="com.byd.emg.pojo.CirculateWater">
+        select
+          <include refid="Base_Column_List" />
+        from circulate_water where  super_id=#{id}
+    </select>
+
+    <!--根据实体类查询对应的数据，判断该实体类是否存在-->
+    <select id="selectByCirculateWater" parameterType="com.byd.emg.pojo.CirculateWater" resultType="com.byd.emg.pojo.CirculateWater">
+        select
+        <include refid="Base_Column_List" />
+        from circulate_water
+        <where>
+            <if test="id!='' and id!=null">
+                and id=#{id}
+            </if>
+            <if test="tag_name!='' and tag_name!=null">
+                and tag_name='${tag_name}'
+            </if>
+            <if test="device_name!='' and device_name!=null">
+                and device_name='${device_name}'
+            </if>
+        </where>
+    </select>
+
+    <!--新增数据-->
+    <insert id="insertCirculateWater" parameterType="com.byd.emg.pojo.CirculateWater">
+        insert into circulate_water (super_id,tag_name,device_name,water_consumption,cost)
+        values (#{super_id},'${tag_name}','${device_name}','${water_consumption}','${cost}')
+    </insert>
+
+    <!--根据id更新对应的数据-->
+    <update id="updateCirculateWaterById" parameterType="com.byd.emg.pojo.CirculateWater">
+        update circulate_water
+        set super_id = ${super_id},
+          tag_name = '${tag_name}',
+          device_name ='${device_name}',
+          water_consumption='${water_consumption}'
+        where id = ${id}
+    </update>
+
+
+</mapper>

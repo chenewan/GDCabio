@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.byd.emg.mapper.OilYieldMapper">
+    <sql id="Base_Column_List" >
+        id,productType,yields,startDate,endDate,produceDays,unitPricePower,unitPriceWater,unitPriceCircuWater,
+        unitPriceFreezeWater,unitPriceSteam,unitPriceAir
+    </sql>
+
+
+    <insert id="insertOilYield" >
+        insert into ${tableName} (productType,produceDays,yields,unitPricePower,unitPriceWater,unitPriceCircuWater,unitPriceFreezeWater,unitPriceSteam,unitPriceAir,
+        startDate,endDate)
+        values ('${oilYield.productType}','${oilYield.produceDays}','${oilYield.yields}','${oilYield.unitPricePower}','${oilYield.unitPriceWater}',
+        '${oilYield.unitPriceCircuWater}','${oilYield.unitPriceFreezeWater}','${oilYield.unitPriceSteam}','${oilYield.unitPriceAir}','${oilYield.startDate}',
+        '${oilYield.endDate}')
+    </insert>
+
+    <select id="selectByTimes" resultType="java.lang.Integer">
+        select id from ${tableName} where startDate='${oilYield.startDate}' and endDate='${oilYield.endDate}'
+        and productType='${oilYield.productType}'
+    </select>
+
+    <select id="selectByDate" parameterType="java.lang.String" resultType="OilYield">
+        select ${topMethod}
+        <include refid="Base_Column_List" />
+        from ${tableName}
+        <where>
+            <if test="type!='' and type!=null">
+                and productType like '%${type}%'
+            </if>
+            <if test="date!='' and date!=null">
+                and startDate like '%${date}%'
+            </if>
+        </where>
+    </select>
+
+    <update id="batchUpdateByIds">
+        update ${tableName} set
+        yields='${oilYield.yields}',
+        produceDays='${oilYield.produceDays}',
+        unitPricePower='${oilYield.unitPricePower}',
+        unitPriceWater='${oilYield.unitPriceWater}',
+        unitPriceCircuWater='${oilYield.unitPriceCircuWater}',
+        unitPriceFreezeWater='${oilYield.unitPriceFreezeWater}',
+        unitPriceSteam='${oilYield.unitPriceSteam}',
+        unitPriceAir='${oilYield.unitPriceAir}'
+        where id in
+        <foreach collection="idList" index="index" item="item"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="updateOilYield">
+        update ${tableName} set
+        yields='${oilYield.yields}',
+        produceDays='${oilYield.produceDays}',
+        unitPricePower='${oilYield.unitPricePower}',
+        unitPriceWater='${oilYield.unitPriceWater}',
+        unitPriceCircuWater='${oilYield.unitPriceCircuWater}',
+        unitPriceFreezeWater='${oilYield.unitPriceFreezeWater}',
+        unitPriceSteam='${oilYield.unitPriceSteam}',
+        startDate='${oilYield.startDate}',
+        endDate='${oilYield.endDate}',
+        unitPriceAir='${oilYield.unitPriceAir}'
+        where id=${oilYield.id}
+    </update>
+
+    <delete id="deleteOilById">
+        delete from ${tableName} where id=${id}
+    </delete>
+
+</mapper>

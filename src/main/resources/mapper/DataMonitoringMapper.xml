@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.byd.emg.mapper.DataMonitoringMapper" >
+
+
+    <resultMap id="TzDataMonitoringPageResultMap" type="com.byd.emg.pojo.DataMonitoring_Power" >
+        <!-- 一对一关系的主表(real_tz_original_table)  ResourceMeter-->
+        <id column="monitoring_id_id" property="monitoring_id_id" />
+        <result column="cabinet_name" property="cabinet_name" />
+        <result column="Uab" property="uab" />
+        <result column="Ubc" property="ubc" />
+        <result column="Uca" property="uca" />
+        <result column="ia" property="ia" />
+        <result column="ib" property="ib" />
+        <result column="ic" property="ic" />
+        <result column="p" property="p" />
+        <result column="q" property="q" />
+        <result column="pf" property="pf" />
+        <result column="ep" property="ep" />
+        <result column="eq" property="eq" />
+        <result column="cabinet_number" property="cabinet_number" />
+        <result column="time" property="time" />
+    </resultMap>
+
+    <resultMap id="TzDataMonitoringfreezeWaterPageResultMap" type="com.byd.emg.pojo.DataMonitoring_freezeWater" >
+        <!-- 冷冻水-->
+        <id column="monitoring_id_id" property="monitoring_id" />
+        <result column="cabinet_name" property="cabinet_name" />
+        <result column="T1" property="t1" />
+        <result column="T2" property="t2" />
+        <result column="Q" property="q" />
+        <result column="EQ" property="eq" />
+        <result column="FE" property="fe" />
+        <result column="TE" property="te" />
+        <result column="cabinet_number" property="cabinet_number" />
+        <result column="time" property="time" />
+    </resultMap>
+
+    <resultMap id="TzDataMonitoringcirculatingWatePageResultMap" type="com.byd.emg.pojo.DataMonitoring_circulatingWate" >
+        <!-- 循环水-->
+        <id column="monitoring_id_id" property="monitoring_id" />
+        <result column="cabinet_name" property="cabinet_name" />
+        <result column="T1" property="t1" />
+        <result column="T2" property="t2" />
+        <result column="Q" property="q" />
+        <result column="EQ" property="eq" />
+        <result column="FE" property="fe" />
+        <result column="TE" property="te" />
+        <result column="cabinet_number" property="cabinet_number" />
+        <result column="time" property="time" />
+    </resultMap>
+
+
+    <resultMap id="TzDataMonitoringtapWaterPageResultMap" type="com.byd.emg.pojo.DataMonitoring_tapWater" >
+        <!-- 自来水-->
+        <id column="monitoring_id_id" property="monitoring_id" />
+        <result column="cabinet_name" property="cabinet_name" />
+
+        <result column="Q" property="q" />
+        <result column="EQ" property="eq" />
+        <result column="V" property="v" />
+        <result column="REQ" property="req" />
+        <result column="cabinet_number" property="cabinet_number" />
+        <result column="time" property="time" />
+    </resultMap>
+
+    <resultMap id="TzDataMonitoringfermentationAirPageResultMap" type="com.byd.emg.pojo.DataMonitoring_fermentationAir" >
+        <!-- 压缩空气-->
+        <id column="monitoring_id_id" property="monitoring_id" />
+        <result column="cabinet_name" property="cabinet_name" />
+        <result column="V" property="v" />
+        <result column="V1" property="v1" />
+        <result column="V2" property="v2" />
+        <result column="EQ" property="eq" />
+        <result column="EQ1" property="eq1" />
+        <result column="EQ2" property="eq2" />
+        <result column="T1" property="t1" />
+        <result column="T2" property="t2" />
+        <result column="T12" property="t12" />
+        <result column="P" property="p" />
+        <result column="cabinet_number" property="cabinet_number" />
+        <result column="time" property="time" />
+    </resultMap>
+
+    <resultMap id="TzDataMonitoringsteamMeterPageResultMap" type="com.byd.emg.pojo.DataMonitoring_steamMeter" >
+        <!-- 蒸汽-->
+        <id column="monitoring_id_id" property="monitoring_id" />
+        <result column="cabinet_name" property="cabinet_name" />
+        <result column="V" property="v" />
+        <result column="V1" property="v1" />
+        <result column="V2" property="v2" />
+        <result column="EQ" property="eq" />
+        <result column="EQ1" property="eq1" />
+        <result column="EQ2" property="eq2" />
+        <result column="T1" property="t1" />
+        <result column="T2" property="t2" />
+        <result column="T12" property="t12" />
+        <result column="P" property="p" />
+        <result column="cabinet_number" property="cabinet_number" />
+        <result column="time" property="time" />
+    </resultMap>
+
+    <sql id="monitoring_power_Column_List">
+        monitoring_id,cabinet_name,cabinet_number,
+        cast(convert(decimal(38,1),cast(replace(case Uab when '' then '0.0' when null then '0.0' else Uab end,',','') as float)) as varchar) as Uab,
+        cast(convert(decimal(38,1),cast(replace(case Ubc when '' then '0.0' when null then '0.0' else Ubc end,',','') as float)) as varchar) as Ubc,
+        cast(convert(decimal(38,1),cast(replace(case Uca when '' then '0.0' when null then '0.0' else Uca end,',','') as float)) as varchar) as Uca,
+        cast(convert(decimal(38,1),cast(replace(case Ia when '' then '0.0' when null then '0.0' else Ia end,',','') as float)) as varchar) as Ia,
+        cast(convert(decimal(38,1),cast(replace(case Ib when '' then '0.0' when null then '0.0' else Ib end,',','') as float)) as varchar) as Ib,
+        cast(convert(decimal(38,1),cast(replace(case Ic when '' then '0.0' when null then '0.0' else Ic end,',','') as float)) as varchar) as Ic,
+        cast(convert(decimal(38,1),cast(replace(case P when '' then '0.0' when null then '0.0' else P end,',','') as float)) as varchar) as P,
+        cast(convert(decimal(38,1),cast(replace(case Q when '' then '0.0' when null then '0.0' else Q end,',','') as float)) as varchar) as Q,
+        cast(convert(decimal(38,2),cast(replace(case PF when '' then '0.0' when null then '0.0' else PF end,',','') as float)) as varchar) as PF,
+        cast(convert(decimal(38,1),cast(replace(case when charindex('E',EP)!=0 then (case when SUBSTRING(EP,charindex('E',EP)+2,2)>27 then SUBSTRING(EP,1,charindex('E',EP)+1)+'27' else EP end) else EP end,',','') as float)) as varchar) as EP,
+        cast(convert(decimal(38,1),cast(replace(case when charindex('E',EQ)!=0 then (case when SUBSTRING(EQ,charindex('E',EQ)+2,2)>27 then SUBSTRING(EQ,1,charindex('E',EQ)+1)+'27' else EQ end) else EQ end,',','') as float)) as varchar) as EQ,time
+    </sql>
+
+    <sql id="monitoring_form_tapWater_Column">
+        monitoring_id,cabinet_name,cabinet_number,
+        cast(convert(decimal(38,1),cast(replace(case Q when '' then '0.0' when null then '0.0' else Q end,',','') as float)) as varchar) as Q,
+        cast(convert(decimal(38,3),cast(replace(case V when '' then '0.0' when null then '0.0' else V end,',','') as float)) as varchar) as V,
+        cast(convert(decimal(38,2),cast(replace(case EQ when '' then '0.0' when null then '0.0' else EQ end,',','') as float)) as varchar) as EQ,
+        cast(convert(decimal(38,3),cast(replace(case REQ when '' then '0.0' when null then '0.0' else REQ end,',','') as float)) as varchar) as REQ,time
+    </sql>
+
+    <sql id="monitoring_form_freezeWater_Column">
+        monitoring_id,cabinet_name,cabinet_number,
+        cast(convert(decimal(38,1),cast(replace(case T1 when '' then '0.0' when null then '0.0' else T1 end,',','') as float)) as varchar) as T1,
+        cast(convert(decimal(38,1),cast(replace(case T2 when '' then '0.0' when null then '0.0' else T2 end,',','') as float)) as varchar) as T2,
+        cast(convert(decimal(38,1),cast(replace(case Q when '' then '0.0' when null then '0.0' else Q end,',','') as float)) as varchar) as Q,
+        cast(convert(decimal(38,2),cast(replace(case EQ when '' then '0.0' when null then '0.0' else EQ end,',','') as float)) as varchar) as EQ,
+        cast(convert(decimal(38,1),cast(replace(case FE when '' then '0.0' when null then '0.0' else FE end,',','') as float)) as varchar) as FE,
+        cast(convert(decimal(38,2),cast(replace(case TE when '' then '0.0' when null then '0.0' else TE end,',','') as float)) as varchar) as TE,
+        time
+    </sql>
+
+    <sql id="monitoring_form_steamMeter_Column">
+        monitoring_id,cabinet_name,cabinet_number,
+        cast(convert(decimal(38,3),cast(replace(case V when '' then '0.0' when null then '0.0' else V end,',','') as float)) as varchar) as V,
+        cast(convert(decimal(38,3),cast(replace(case V1 when '' then '0.0' when null then '0.0' else V1 end,',','') as float)) as varchar) as V1,
+        cast(convert(decimal(38,3),cast(replace(case V2 when '' then '0.0' when null then '0.0' else V2 end,',','') as float)) as varchar) as V2,
+        cast(convert(decimal(38,1),cast(replace(case EQ when '' then '0.0' when null then '0.0' else EQ end,',','') as float)) as varchar) as EQ,
+        cast(convert(decimal(38,1),cast(replace(case EQ1 when '' then '0.0' when null then '0.0' else EQ1 end,',','') as float)) as varchar) as EQ1,
+        cast(convert(decimal(38,1),cast(replace(case EQ2 when '' then '0.0' when null then '0.0' else EQ2 end,',','') as float)) as varchar) as EQ2,
+        cast(convert(decimal(38,1),cast(replace(case T1 when '' then '0.0' when null then '0.0' else T1 end,',','') as float)) as varchar) as T1,
+        cast(convert(decimal(38,1),cast(replace(case T2 when '' then '0.0' when null then '0.0' else T2 end,',','') as float)) as varchar) as T2,
+        cast(convert(decimal(38,1),cast(replace(case T12 when '' then '0.0' when null then '0.0' else T12 end,',','') as float)) as varchar) as T12,
+        cast(convert(decimal(38,3),cast(replace(case P when '' then '0.0' when null then '0.0' else P end,',','') as float)) as varchar) as P,
+        time
+    </sql>
+
+    <!--查询电的柜体编号和柜体名称-->
+    <select id="cabinetnumberToName" resultMap="TzDataMonitoringPageResultMap">
+        select cabinet_number,cabinet_name from monitoring_form_power_table
+    </select>
+
+
+    <!--查询电的仪表信息-->
+    <select id="AllDataByTzDataMonitoring" resultMap="TzDataMonitoringPageResultMap">
+        SELECT <include refid="monitoring_power_Column_List" />
+        FROM monitoring_form_power_table
+        <where>
+            <if test="cabinet_number !=null and cabinet_number.size >0">
+                cabinet_number in
+                <foreach collection="cabinet_number" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where >
+    </select>
+
+    <!--查询电=================================================================-->
+
+    <select id="cabinetnumberToName_freezeWater" resultMap="TzDataMonitoringfreezeWaterPageResultMap">
+        select cabinet_number,cabinet_name from monitoring_form_freezeWater_table
+    </select>
+
+
+    <select id="AllDataByTzDataMonitoring_freezeWater" resultMap="TzDataMonitoringfreezeWaterPageResultMap">
+        SELECT <include refid="monitoring_form_freezeWater_Column" />
+        FROM monitoring_form_freezeWater_table
+        <where>
+            <if test="cabinet_number !=null and cabinet_number.size >0">
+                cabinet_number in
+                <foreach collection="cabinet_number" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where >
+        ORDER BY monitoring_id;
+    </select>
+
+    <!--查询冷冻水=================================================================-->
+
+    <select id="cabinetnumberToName_tapWater" resultMap="TzDataMonitoringtapWaterPageResultMap">
+        select cabinet_number,cabinet_name from monitoring_form_tapWater_table
+    </select>
+
+    <select id="AllDataByTzDataMonitoring_tapWater" resultMap="TzDataMonitoringtapWaterPageResultMap">
+        SELECT <include refid="monitoring_form_tapWater_Column" />
+        FROM monitoring_form_tapWater_table
+        <where>
+            <if test="cabinet_number !=null and cabinet_number.size >0">
+                cabinet_number in
+                <foreach collection="cabinet_number" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where >
+        ORDER BY monitoring_id;
+    </select>
+
+    <!--查询循环水=================================================================-->
+
+    <select id="cabinetnumberToName_circulatingWate" resultMap="TzDataMonitoringcirculatingWatePageResultMap">
+        select cabinet_number,cabinet_name from monitoring_form_circulatingWate_table
+    </select>
+
+
+    <select id="AllDataByTzDataMonitoring_circulatingWate" resultMap="TzDataMonitoringcirculatingWatePageResultMap">
+        SELECT <include refid="monitoring_form_freezeWater_Column" />
+        FROM monitoring_form_circulatingWater_table
+        <where>
+            <if test="cabinet_number !=null and cabinet_number.size >0">
+                cabinet_number in
+                <foreach collection="cabinet_number" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where >
+        ORDER BY monitoring_id;
+    </select>
+
+    <!--查询循环水=================================================================-->
+
+
+    <select id="cabinetnumberToName_fermentationAir" resultMap="TzDataMonitoringfermentationAirPageResultMap">
+        select cabinet_number,cabinet_name from monitoring_form_fermentationAir_table
+    </select>
+
+
+    <select id="AllDataByTzDataMonitoring_fermentationAir" resultMap="TzDataMonitoringfermentationAirPageResultMap">
+        SELECT <include refid="monitoring_form_steamMeter_Column" />
+        FROM monitoring_form_fermentationAir_table
+        <where>
+            <if test="cabinet_number !=null and cabinet_number.size >0">
+                cabinet_number in
+                <foreach collection="cabinet_number" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where >
+        ORDER BY monitoring_id;
+    </select>
+
+    <!--查询压缩空气=================================================================-->
+
+
+    <select id="cabinetnumberToName_steamMeter" resultMap="TzDataMonitoringsteamMeterPageResultMap">
+        select cabinet_number,cabinet_name from monitoring_form_steamMeter_table
+    </select>
+
+
+    <select id="AllDataByTzDataMonitoring_steamMeter" resultMap="TzDataMonitoringsteamMeterPageResultMap">
+        SELECT <include refid="monitoring_form_steamMeter_Column" />
+        FROM monitoring_form_steamMeter_table
+        <where>
+            <if test="cabinet_number !=null and cabinet_number.size >0">
+                cabinet_number in
+                <foreach collection="cabinet_number" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where >
+        ORDER BY monitoring_id;
+    </select>
+
+    <!--查询蒸汽=================================================================-->
+</mapper>
